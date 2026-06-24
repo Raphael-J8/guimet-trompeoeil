@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Creation From Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F2DC;
+    --dark: #1a1a1a;
+    --accent: #2a2a2a;
+    --btn-bg: #EEE8C0;
+    --btn-border: #c8c090;
+    --back-btn: #E8E2B8;
+    --slot-empty: rgba(180,175,140,0.25);
+    --slot-border: rgba(80,70,40,0.35);
+    --shelf-color: #1a1a1a;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+  }
+
+  /* ============ SCREENS ============ */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 64px 80px 100px;
+    background: var(--cream);
+    transition: opacity 0.4s ease;
+  }
+  .screen.active { display: flex; }
+
+  /* ============ SCREEN 0 - VEILLE ============ */
+  #screen-veille {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+    cursor: pointer;
+  }
+  #screen-veille .veille-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dark);
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  #veille-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ============ SCREEN 1 - ACCUEIL ============ */
+  #screen-accueil {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 32px;
+  }
+  #screen-accueil .app-title {
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  #screen-accueil .app-subtitle {
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  #screen-accueil .citation {
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 300;
+    max-width: 700px;
+    line-height: 1.6;
+    opacity: 0.75;
+    margin-top: 8px;
+  }
+  .lang-buttons {
+    display: flex;
+    gap: 32px;
+    margin-top: 24px;
+  }
+  .lang-btn {
+    padding: 20px 56px;
+    background: var(--btn-bg);
+    border: 2px solid var(--btn-border);
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .lang-btn:hover { background: #ddd8a8; transform: scale(1.02); }
+  .lang-btn:active { transform: scale(0.98); }
+
+  /* ============ SCREEN 2 - STYLE ============ */
+  #screen-style {
+    gap: 0;
+  }
+  .style-grid {
+    display: flex;
+    gap: 32px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    margin: 32px 0;
+  }
+  .style-card {
+    flex: 1;
+    max-width: 280px;
+    height: 340px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .style-card:hover { transform: scale(1.02); }
+  .style-card.selected { border-color: var(--dark); outline: 3px solid var(--dark); }
+  .style-card-img {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+  }
+  .style-card-label {
+    padding: 12px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(255,255,255,0.3);
+  }
+  .style-card-desc {
+    padding: 4px 12px 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.3);
+  }
+
+  /* ============ SCREEN 3 - MOBILIER ============ */
+  #screen-mobilier {
+    gap: 0;
+  }
+  .mobilier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    flex: 1;
+    align-items: center;
+    margin: 24px 0;
+  }
+  .mobilier-card {
+    border: 2px solid rgba(80,70,40,0.2);
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    aspect-ratio: 1.2;
+    position: relative;
+  }
+  .mobilier-card:hover { transform: scale(1.03); border-color: rgba(80,70,40,0.5); }
+  .mobilier-card.selected { border-color: var(--dark); border-width: 3px; background: rgba(255,255,255,0.5); }
+  .mobilier-card svg { width: 80%; height: 80%; }
+  .mobilier-card-label {
+    position: absolute;
+    bottom: 6px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    opacity: 0.6;
+  }
+
+  /* ============ SCREEN 4 - ATELIER ============ */
+  #screen-atelier {
+    flex-direction: row;
+    padding: 48px 48px 80px;
+    gap: 32px;
+  }
+
+  .atelier-left {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    min-height: 80px;
+  }
+  .category-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+  .category-info h3 {
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .category-info p {
+    font-size: 16px;
+    opacity: 0.65;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .object-carousel {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .object-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 4px;
+    overflow-y: auto;
+    max-height: 100%;
+  }
+  .object-item {
+    background: rgba(255,255,255,0.45);
+    border: 1.5px solid rgba(80,70,40,0.25);
+    cursor: grab;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px 8px;
+    aspect-ratio: 1;
+    position: relative;
+  }
+  .object-item:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .object-item:active { cursor: grabbing; }
+  .object-item .obj-visual {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+  .object-item .obj-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    opacity: 0.65;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .category-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .cat-tab {
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.3);
+    border: 1.5px solid rgba(80,70,40,0.2);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+  }
+  .cat-tab:hover { background: rgba(255,255,255,0.55); }
+  .cat-tab.active { background: var(--btn-bg); border-color: var(--dark); }
+
+  /* SHELF AREA */
+  .atelier-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .shelf-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #shelf-svg-container {
+    position: relative;
+    width: 420px;
+    height: 380px;
+  }
+  #shelf-svg-container svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  #dropped-objects-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .dropped-obj {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: grab;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s;
+    pointer-events: all;
+  }
+  .dropped-obj:active { cursor: grabbing; }
+  .dropped-obj.vibrate { animation: vibrate 0.4s ease; }
+  .dropped-obj.disappear { animation: disappear 0.4s ease forwards; }
+
+  @keyframes vibrate {
+    0%,100% { transform: translate(-50%,-50%) rotate(0deg); }
+    20% { transform: translate(calc(-50% - 4px),-50%) rotate(-3deg); }
+    40% { transform: translate(calc(-50% + 4px),-50%) rotate(3deg); }
+    60% { transform: translate(calc(-50% - 3px),-50%) rotate(-2deg); }
+    80% { transform: translate(calc(-50% + 3px),-50%) rotate(2deg); }
+  }
+  @keyframes disappear {
+    0% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(0.2); }
+  }
+
+  .shelf-hint {
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    opacity: 0.5;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  /* ============ SCREEN 5 - FIN ============ */
+  #screen-fin {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 32px;
+  }
+  .fin-title {
+    font-size: 56px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .fin-shelf-preview {
+    width: 360px;
+    height: 300px;
+    border: 2px solid var(--dark);
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,0.3);
+  }
+  .qr-placeholder {
+    width: 160px;
+    height: 160px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dark);
+    flex-direction: column;
+    gap: 8px;
+  }
+  .qr-placeholder canvas { width: 120px; height: 120px; }
+  .fin-citation {
+    font-size: 22px;
+    font-style: italic;
+    opacity: 0.65;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  .fin-credits {
+    font-size: 14px;
+    opacity: 0.4;
+    letter-spacing: 0.04em;
+  }
+
+  /* ============ NAV BUTTONS ============ */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 32px;
+    left: 48px;
+    right: 48px;
+  }
+  .nav-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--back-btn);
+    border: 2px solid rgba(80,70,40,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover { background: #ddd8a8; transform: scale(1.05); }
+  .nav-btn:active { transform: scale(0.95); }
+  .nav-btn.validate {
+    background: var(--btn-bg);
+    border-color: var(--dark);
+  }
+
+  .nav-center {
+    flex: 1;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+    padding: 0 24px;
+  }
+
+  /* ============ SCREEN TITLE ============ */
+  .screen-title {
+    font-size: 44px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  /* ============ TIMEOUT OVERLAY ============ */
+  #timeout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 32px;
+  }
+  #timeout-overlay.active { display: flex; }
+  .timeout-box {
+    background: var(--cream);
+    padding: 60px 80px;
+    text-align: center;
+    max-width: 600px;
+  }
+  .timeout-box h2 {
+    font-size: 44px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .timeout-box p {
+    font-size: 24px;
+    opacity: 0.7;
+    margin-bottom: 32px;
+  }
+  .timeout-btns {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+  .timeout-btn {
+    padding: 16px 40px;
+    background: var(--btn-bg);
+    border: 2px solid var(--btn-border);
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .timeout-btn:hover { background: #ddd8a8; }
+  .timeout-btn.danger { background: #e8c8c0; border-color: #c09090; }
+
+  /* ============ HOME CONFIRM OVERLAY ============ */
+  #home-confirm {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  #home-confirm.active { display: flex; }
+  .confirm-box {
+    background: var(--cream);
+    padding: 48px 64px;
+    text-align: center;
+    max-width: 500px;
+  }
+  .confirm-box h2 { font-size: 36px; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; }
+  .confirm-box p { font-size: 20px; opacity: 0.65; margin-bottom: 28px; }
+  .confirm-btns { display: flex; gap: 20px; justify-content: center; }
+  .confirm-btn {
+    padding: 14px 36px;
+    background: var(--btn-bg);
+    border: 2px solid var(--btn-border);
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .confirm-btn:hover { background: #ddd8a8; }
+  .confirm-btn.danger { background: #e8c8c0; border-color: #c09090; }
+
+  /* ============ DRAG GHOST ============ */
+  #drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+    font-size: 44px;
+    transform: translate(-50%, -50%);
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  }
+
+  /* STYLE THEMES */
+  body.style-baroque { --cream: #F4EDD0; --btn-bg: #DDD0A0; }
+  body.style-aquarelle { --cream: #EEF5F0; --btn-bg: #C8DDD0; }
+  body.style-pop { --cream: #FFF5E8; --btn-bg: #FFE0A0; }
+
+  /* Scrollbar */
+  .object-grid::-webkit-scrollbar { width: 4px; }
+  .object-grid::-webkit-scrollbar-track { background: transparent; }
+  .object-grid::-webkit-scrollbar-thumb { background: rgba(80,70,40,0.3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 0: VEILLE -->
+<div id="screen-veille" class="screen active" onclick="goToScreen('accueil')">
+  <canvas id="veille-canvas"></canvas>
+  <div class="veille-text" id="veille-text-fr">
+    ÉCRAN DE VEILLE<br>INVITATION À TOUCHER L'ÉCRAN
+  </div>
+</div>
+
+<!-- SCREEN 1: ACCUEIL -->
+<div id="screen-accueil" class="screen">
+  <div class="app-title" id="title-text">MA BIBLIOTHÈQUE</div>
+  <div class="app-subtitle" id="subtitle-text">COMPOSEZ VOTRE ÉTAGÈRE PERSONNELLE</div>
+  <div class="citation" id="citation1-text">
+    « Une bibliothèque, c'est une façon de parler de soi sans avoir à dire un mot. »
+  </div>
+  <div class="lang-buttons">
+    <button class="lang-btn" onclick="setLang('fr'); goToScreen('style')">COMMENCER</button>
+    <button class="lang-btn" onclick="setLang('en'); goToScreen('style')">START</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: STYLE -->
+<div id="screen-style" class="screen">
+  <div class="screen-title" id="style-screen-title">CHOISISSEZ VOTRE STYLE ET ENVIRONNEMENT</div>
+  <div class="style-grid">
+    <div class="style-card" id="style-baroque" style="background:#F4EDD0;" onclick="selectStyle('baroque')">
+      <div class="style-card-img">🏛️</div>
+      <div class="style-card-label">STYLE BAROQUE</div>
+      <div class="style-card-desc">Ornements dorés, richesse classique</div>
+    </div>
+    <div class="style-card" id="style-aquarelle" style="background:#C8E8D8;" onclick="selectStyle('aquarelle')">
+      <div class="style-card-img">🎨</div>
+      <div class="style-card-label">STYLE AQUARELLE</div>
+      <div class="style-card-desc">Teintes douces, légèreté poétique</div>
+    </div>
+    <div class="style-card" id="style-pop" style="background:#FFD080;" onclick="selectStyle('pop')">
+      <div class="style-card-img">⚡</div>
+      <div class="style-card-label">STYLE POP</div>
+      <div class="style-card-desc">Couleurs vives, énergie contemporaine</div>
+    </div>
+  </div>
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="goToScreen('accueil')">◁</button>
+    <div class="nav-center" id="style-hint">CHOISISSEZ VOTRE STYLE ET ENVIRONNEMENT</div>
+    <button class="nav-btn" onclick="showHomeConfirm()">⌂</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: MOBILIER -->
+<div id="screen-mobilier" class="screen">
+  <div class="screen-title" id="mobilier-screen-title">CHOISISSEZ VOTRE MOBILIER</div>
+  <div class="mobilier-grid" id="mobilier-grid">
+    <!-- SVG shelves inserted by JS -->
+  </div>
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="goToScreen('style')">◁</button>
+    <div class="nav-center" id="mobilier-hint">CHOISISSEZ VOTRE MOBILIER.</div>
+    <button class="nav-btn" onclick="showHomeConfirm()">⌂</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: ATELIER -->
+<div id="screen-atelier" class="screen">
+  <div class="atelier-left">
+    <div class="category-header">
+      <div class="category-icon" id="cat-icon">💡</div>
+      <div class="category-info">
+        <h3 id="cat-title">S'INSPIRER</h3>
+        <p id="cat-desc">Des objets qui éveillent votre curiosité et vous inspirent au quotidien.</p>
+      </div>
+    </div>
+    <div class="category-tabs" id="category-tabs"></div>
+    <div class="object-carousel">
+      <div class="object-grid" id="object-grid"></div>
+    </div>
+  </div>
+  <div class="atelier-right">
+    <div class="shelf-stage">
+      <div id="shelf-svg-container">
+        <!-- shelf SVG here -->
+        <div id="dropped-objects-layer"></div>
+      </div>
+    </div>
+    <div class="shelf-hint" id="shelf-hint">GLISSEZ LES OBJETS SUR LE MOBILIER</div>
+  </div>
+  <div class="nav-bar" style="left:48px; right:48px; bottom:16px;">
+    <button class="nav-btn" onclick="goToScreen('mobilier')">◁</button>
+    <div class="nav-center" id="atelier-hint">INVITATION À REMPLIR LE MOBILIER</div>
+    <button class="nav-btn validate" onclick="goToScreen('fin')">✓</button>
+    <button class="nav-btn" onclick="showHomeConfirm()" style="margin-left:8px;">⌂</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: FIN -->
+<div id="screen-fin" class="screen">
+  <div class="fin-title" id="fin-title">VOTRE BIBLIOTHÈQUE EST CRÉÉE !</div>
+  <div style="display:flex; gap:48px; align-items:center;">
+    <div class="fin-shelf-preview" id="fin-shelf-preview"></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+      <div class="qr-placeholder">
+        <canvas id="qr-canvas" width="120" height="120"></canvas>
+        <span style="font-size:12px; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em;">QR Code</span>
+      </div>
+      <div style="font-size:16px; text-align:center; opacity:0.6; text-transform:uppercase; letter-spacing:0.06em;">Scannez pour partager</div>
+    </div>
+  </div>
+  <div class="fin-citation" id="fin-citation">
+    « Les livres sont des miroirs : on n'y trouve que ce qu'on y apporte déjà. »
+  </div>
+  <div class="fin-credits">Une expérience interactive · Musée · 2024</div>
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="goToScreen('atelier')">◁</button>
+    <div class="nav-center"></div>
+    <button class="nav-btn" onclick="goToScreen('veille'); resetApp()">⌂</button>
+  </div>
+</div>
+
+<!-- TIMEOUT OVERLAY -->
+<div id="timeout-overlay">
+  <div class="timeout-box">
+    <h2 id="timeout-title">Êtes-vous toujours là ?</h2>
+    <p id="timeout-msg">L'expérience va se réinitialiser dans quelques secondes.</p>
+    <div class="timeout-btns">
+      <button class="timeout-btn" onclick="dismissTimeout()" id="timeout-yes">OUI, CONTINUER</button>
+      <button class="timeout-btn danger" onclick="goToScreen('veille'); resetApp(); dismissTimeout()" id="timeout-no">RECOMMENCER</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOME CONFIRM -->
+<div id="home-confirm">
+  <div class="confirm-box">
+    <h2 id="confirm-title">RETOUR À L'ACCUEIL ?</h2>
+    <p id="confirm-msg">Votre progression sera perdue.</p>
+    <div class="confirm-btns">
+      <button class="confirm-btn" onclick="hideHomeConfirm()" id="confirm-cancel">ANNULER</button>
+      <button class="confirm-btn danger" onclick="goToScreen('veille'); resetApp(); hideHomeConfirm()" id="confirm-ok">CONFIRMER</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAG GHOST -->
+<div id="drag-ghost">🌟</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentScreen = 'veille';
+let currentLang = 'fr';
+let selectedStyle = null;
+let selectedMobilier = null;
+let currentCategory = 0;
+let droppedObjects = [];
+let dragItem = null;
+let dragGhost = document.getElementById('drag-ghost');
+let isDraggingDropped = false;
+let dragDroppedId = null;
+
+let timeoutTimer = null;
+let timeoutWarningTimer = null;
+const TIMEOUT_WARN = 70000;
+const TIMEOUT_RESET = 20000;
+
+// ============================================================
+// I18N
+// ============================================================
+const T = {
+  fr: {
+    veille: 'ÉCRAN DE VEILLE\nINVITATION À TOUCHER L\'ÉCRAN',
+    title: 'MA BIBLIOTHÈQUE',
+    subtitle: 'COMPOSEZ VOTRE ÉTAGÈRE PERSONNELLE',
+    citation1: '« Une bibliothèque, c\'est une façon de parler de soi sans avoir à dire un mot. »',
+    styleTitle: 'CHOISISSEZ VOTRE STYLE ET ENVIRONNEMENT',
+    mobilierTitle: 'CHOISISSEZ VOTRE MOBILIER',
+    mobilierHint: 'CHOISISSEZ VOTRE MOBILIER.',
+    atelierHint: 'INVITATION À REMPLIR LE MOBILIER',
+    shelfHint: 'GLISSEZ LES OBJETS SUR LE MOBILIER',
+    finTitle: 'VOTRE BIBLIOTHÈQUE EST CRÉÉE !',
+    finCitation: '« Les livres sont des miroirs : on n\'y trouve que ce qu\'on y apporte déjà. »',
+    timeoutTitle: 'Êtes-vous toujours là ?',
+    timeoutMsg: 'L\'expérience va se réinitialiser dans quelques secondes.',
+    timeoutYes: 'OUI, CONTINUER',
+    timeoutNo: 'RECOMMENCER',
+    confirmTitle: 'RETOUR À L\'ACCUEIL ?',
+    confirmMsg: 'Votre progression sera perdue.',
+    confirmCancel: 'ANNULER',
+    confirmOk: 'CONFIRMER',
+  },
+  en: {
+    veille: 'SCREENSAVER\nTOUCH THE SCREEN TO BEGIN',
+    title: 'MY LIBRARY',
+    subtitle: 'COMPOSE YOUR PERSONAL SHELF',
+    citation1: '"A library is a way of talking about yourself without having to say a word."',
+    styleTitle: 'CHOOSE YOUR STYLE AND ENVIRONMENT',
+    mobilierTitle: 'CHOOSE YOUR FURNITURE',
+    mobilierHint: 'CHOOSE YOUR FURNITURE.',
+    atelierHint: 'FILL YOUR FURNITURE WITH OBJECTS',
+    shelfHint: 'DRAG OBJECTS ONTO THE SHELF',
+    finTitle: 'YOUR LIBRARY IS CREATED!',
+    finCitation: '"Books are mirrors: you only find in them what you already bring."',
+    timeoutTitle: 'Are you still there?',
+    timeoutMsg: 'The experience will reset in a few seconds.',
+    timeoutYes: 'YES, CONTINUE',
+    timeoutNo: 'RESTART',
+    confirmTitle: 'RETURN TO HOME?',
+    confirmMsg: 'Your progress will be lost.',
+    confirmCancel: 'CANCEL',
+    confirmOk: 'CONFIRM',
+  }
+};
+
+function t(key) { return T[currentLang][key] || T['fr'][key]; }
+
+function setLang(lang) {
+  currentLang = lang;
+  updateTexts();
+}
+
+function updateTexts() {
+  const L = currentLang;
+  document.getElementById('title-text').textContent = t('title');
+  document.getElementById('subtitle-text').textContent = t('subtitle');
+  document.getElementById('citation1-text').textContent = t('citation1');
+  document.getElementById('style-screen-title').textContent = t('styleTitle');
+  document.getElementById('style-hint').textContent = t('styleTitle');
+  document.getElementById('mobilier-screen-title').textContent = t('mobilierTitle');
+  document.getElementById('mobilier-hint').textContent = t('mobilierHint');
+  document.getElementById('atelier-hint').textContent = t('atelierHint');
+  document.getElementById('shelf-hint').textContent = t('shelfHint');
+  document.getElementById('fin-title').textContent = t('finTitle');
+  document.getElementById('fin-citation').textContent = t('finCitation');
+  document.getElementById('timeout-title').textContent = t('timeoutTitle');
+  document.getElementById('timeout-msg').textContent = t('timeoutMsg');
+  document.getElementById('timeout-yes').textContent = t('timeoutYes');
+  document.getElementById('timeout-no').textContent = t('timeoutNo');
+  document.getElementById('confirm-title').textContent = t('confirmTitle');
+  document.getElementById('confirm-msg').textContent = t('confirmMsg');
+  document.getElementById('confirm-cancel').textContent = t('confirmCancel');
+  document.getElementById('confirm-ok').textContent = t('confirmOk');
+}
+
+// ============================================================
+// CATEGORIES & OBJECTS
+// ============================================================
+const categories = [
+  {
+    id: 'inspirer', icon: '💡',
+    fr: { name: "S'INSPIRER", desc: "Des objets qui éveillent votre curiosité et vous inspirent." },
+    en: { name: "INSPIRE YOURSELF", desc: "Objects that spark curiosity and inspire you." },
+    objects: [
+      { emoji: '🌿', fr: 'Plante', en: 'Plant' },
+      { emoji: '🔭', fr: 'Télescope', en: 'Telescope' },
+      { emoji: '🕯️', fr: 'Bougie', en: 'Candle' },
+      { emoji: '🌍', fr: 'Globe', en: 'Globe' },
+      { emoji: '🎭', fr: 'Masque', en: 'Mask' },
+      { emoji: '🦋', fr: 'Papillon', en: 'Butterfly' },
+    ]
+  },
+  {
+    id: 'souvenir', icon: '📷',
+    fr: { name: "SE SOUVENIR", desc: "Des objets chargés de mémoire et d'histoire personnelle." },
+    en: { name: "REMEMBER", desc: "Objects filled with memory and personal history." },
+    objects: [
+      { emoji: '📸', fr: 'Photo', en: 'Photo' },
+      { emoji: '🎞️', fr: 'Film', en: 'Film' },
+      { emoji: '🪆', fr: 'Poupée', en: 'Doll' },
+      { emoji: '🧸', fr: 'Peluche', en: 'Teddy' },
+      { emoji: '🗺️', fr: 'Carte', en: 'Map' },
+      { emoji: '🎪', fr: 'Souvenir', en: 'Souvenir' },
+    ]
+  },
+  {
+    id: 'definir', icon: '🪞',
+    fr: { name: "SE DÉFINIR", desc: "Des objets qui révèlent qui vous êtes et vos valeurs." },
+    en: { name: "DEFINE YOURSELF", desc: "Objects that reveal who you are and your values." },
+    objects: [
+      { emoji: '🎸', fr: 'Guitare', en: 'Guitar' },
+      { emoji: '🎨', fr: 'Palette', en: 'Palette' },
+      { emoji: '⚽', fr: 'Ballon', en: 'Ball' },
+      { emoji: '🧩', fr: 'Puzzle', en: 'Puzzle' },
+      { emoji: '🎯', fr: 'Cible', en: 'Target' },
+      { emoji: '🏆', fr: 'Trophée', en: 'Trophy' },
+    ]
+  },
+  {
+    id: 'collectionner', icon: '🪙',
+    fr: { name: "COLLECTIONNER", desc: "Des objets précieux que vous aimez rassembler." },
+    en: { name: "COLLECT", desc: "Precious objects you love to gather." },
+    objects: [
+      { emoji: '🪙', fr: 'Pièce', en: 'Coin' },
+      { emoji: '💎', fr: 'Gemme', en: 'Gem' },
+      { emoji: '🫙', fr: 'Bocal', en: 'Jar' },
+      { emoji: '🐚', fr: 'Coquillage', en: 'Shell' },
+      { emoji: '🪨', fr: 'Pierre', en: 'Stone' },
+      { emoji: '🌸', fr: 'Fleur', en: 'Flower' },
+    ]
+  },
+  {
+    id: 'livres', icon: '📚',
+    fr: { name: "LIVRES", desc: "Des ouvrages qui ont marqué votre vie." },
+    en: { name: "BOOKS", desc: "Works that have marked your life." },
+    objects: [
+      { emoji: '📖', fr: 'Roman', en: 'Novel' },
+      { emoji: '📝', fr: 'Journal', en: 'Journal' },
+      { emoji: '🗞️', fr: 'Journal', en: 'Newspaper' },
+      { emoji: '📜', fr: 'Parchemin', en: 'Scroll' },
+      { emoji: '📓', fr: 'Cahier', en: 'Notebook' },
+      { emoji: '🔖', fr: 'Signet', en: 'Bookmark' },
+    ]
+  },
+  {
+    id: 'exposition', icon: '🖼️',
+    fr: { name: "EXPOSITION", desc: "Des objets issus du monde de l'art et de la culture." },
+    en: { name: "EXHIBITION", desc: "Objects from the world of art and culture." },
+    objects: [
+      { emoji: '🖼️', fr: 'Tableau', en: 'Painting' },
+      { emoji: '🗿', fr: 'Statue', en: 'Statue' },
+      { emoji: '🎭', fr: 'Théâtre', en: 'Theatre' },
+      { emoji: '🎶', fr: 'Musique', en: 'Music' },
+      { emoji: '🏺', fr: 'Vase', en: 'Vase' },
+      { emoji: '🎬', fr: 'Cinéma', en: 'Cinema' },
+    ]
+  }
+];
+
+// ============================================================
+// SHELF DEFINITIONS
+// ============================================================
+const shelves = [
+  {
+    id: 'escalier',
+    fr: 'Escalier', en: 'Staircase',
+    slots: generateEscalierSlots(),
+    svgPath: drawEscalierSVG()
+  },
+  {
+    id: 'croix',
+    fr: 'Croix grecque', en: 'Greek Cross',
+    slots: generateCroixSlots(),
+    svgPath: drawCroixSVG()
+  },
+  {
+    id: 'irreguliere',
+    fr: 'Mosaïque irrégulière', en: 'Irregular Mosaic',
+    slots: generateIrregulierSlots(),
+    svgPath: drawIrregulierSVG()
+  },
+  {
+    id: 'reguliere',
+    fr: 'Mosaïque régulière', en: 'Regular Mosaic',
+    slots: generateReguliereSlots(),
+    svgPath: drawReguliereSVG()
+  },
+  {
+    id: 'horizontales',
+    fr: 'Étagères horizontales', en: 'Horizontal Shelves',
+    slots: generateHorizontalesSlots(),
+    svgPath: drawHorizontalesSVG()
+  },
+  {
+    id: 'porte',
+    fr: 'Porte', en: 'Door',
+    slots: generatePorteSlots(),
+    svgPath: drawPorteSVG()
+  }
+];
+
+function S(x,y,w,h) { return {x,y,w,h}; }
+
+function generateEscalierSlots() {
+  const s=80, t=10; // slot size, thickness
+  return [
+    S(180,0,s,s), // row 0 col 2
+    S(90,s,s,s), S(180,s,s,s), // row 1
+    S(0,s*2,s,s), S(90,s*2,s,s), S(180,s*2,s,s), // row 2
+  ];
+}
+function drawEscalierSVG() {
+  const s=80, W=260, H=240, sw=10;
+  let paths = '';
+  // staircase outline - draw thick border cells
+  const cells = [{c:2,r:0},{c:1,r:1},{c:2,r:1},{c:0,r:2},{c:1,r:2},{c:2,r:2}];
+  cells.forEach(({c,r}) => {
+    const x = c*s + sw/2, y = r*s + sw/2;
+    paths += `<rect x="${x}" y="${y}" width="${s-sw}" height="${s-sw}" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+function generateCroixSlots() {
+  const s=80;
+  return [
+    S(s,0,s,s),
+    S(0,s,s,s), S(s,s,s,s), S(s*2,s,s,s),
+    S(s,s*2,s,s),
+  ];
+}
+function drawCroixSVG() {
+  const s=80, W=240, H=240, sw=10;
+  let paths='';
+  [{c:1,r:0},{c:0,r:1},{c:1,r:1},{c:2,r:1},{c:1,r:2}].forEach(({c,r})=>{
+    const x=c*s+sw/2, y=r*s+sw/2;
+    paths+=`<rect x="${x}" y="${y}" width="${s-sw}" height="${s-sw}" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+function generateIrregulierSlots() {
+  return [
+    S(0,0,100,100), S(110,0,80,80),
+    S(0,110,80,80), S(90,90,100,100),
+    S(200,60,90,120),
+  ];
+}
+function drawIrregulierSVG() {
+  const sw=10, W=300, H=230;
+  let paths='';
+  generateIrregulierSlots().forEach(({x,y,w,h})=>{
+    paths+=`<rect x="${x+sw/2}" y="${y+sw/2}" width="${w-sw}" height="${h-sw}" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+function generateReguliereSlots() {
+  const s=80;
+  const slots=[];
+  for(let r=0;r<3;r++) for(let c=0;c<3;c++) slots.push(S(c*s,r*s,s,s));
+  return slots;
+}
+function drawReguliereSVG() {
+  const s=80, W=240, H=240, sw=10;
+  let paths='';
+  for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+    const x=c*s+sw/2, y=r*s+sw/2;
+    paths+=`<rect x="${x}" y="${y}" width="${s-sw}" height="${s-sw}" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+function generateHorizontalesSlots() {
+  const slots=[];
+  for(let i=0;i<3;i++) for(let c=0;c<3;c++) slots.push(S(c*90,i*80,80,70));
+  return slots;
+}
+function drawHorizontalesSVG() {
+  const W=280, H=240, sw=10;
+  let paths='', h=8;
+  // 3 horizontal shelves with dividers
+  [0,80,160].forEach(y=>{
+    [0,90,180].forEach(x=>{
+      paths+=`<rect x="${x+sw/2}" y="${y+sw/2}" width="${80-sw}" height="${70-sw}" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+function generatePorteSlots() {
+  return [
+    S(0,0,110,80), S(120,0,110,80),
+    S(0,90,110,80), S(120,90,110,80),
+    S(50,180,130,80),
+  ];
+}
+function drawPorteSVG() {
+  const sw=10, W=240, H=280;
+  let paths='';
+  // arch on top
+  paths+=`<path d="M10,260 L10,80 Q120,0 230,80 L230,260 Z" fill="none" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  // center line vertical
+  paths+=`<line x1="120" y1="90" x2="120" y2="260" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  // horizontal lines
+  paths+=`<line x1="10" y1="170" x2="230" y2="170" stroke="#1a1a1a" stroke-width="${sw}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+}
+
+// ============================================================
+// SCREEN NAVIGATION
+// ============================================================
+function goToScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  currentScreen = name;
+  resetTimeout();
+
+  if (name === 'mobilier') renderMobilierGrid();
+  if (name === 'atelier') renderAtelier();
+  if (name === 'fin') renderFin();
+  if (name === 'veille') startVeille();
+}
+
+// ============================================================
+// STYLE SELECTION
+// ============================================================
+function selectStyle(style) {
+  selectedStyle = style;
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('style-' + style).classList.add('selected');
+  document.body.className = 'style-' + style;
+  setTimeout(() => goToScreen('mobilier'), 400);
+}
+
+// ============================================================
+// MOBILIER GRID
+// ============================================================
+function renderMobilierGrid() {
+  const grid = document.getElementById('mobilier-grid');
+  grid.innerHTML = '';
+  shelves.forEach((sh, i) => {
+    const card = document.createElement('div');
+    card.className = 'mobilier-card' + (selectedMobilier === i ? ' selected' : '');
+    card.innerHTML = sh.svgPath + `<div class="mobilier-card-label">${currentLang==='fr'?sh.fr:sh.en}</div>`;
+    card.onclick = () => {
+      selectedMobilier = i;
+      document.querySelectorAll('.mobilier-card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      setTimeout(() => goToScreen('atelier'), 400);
+    };
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+// ATELIER
+// ============================================================
+function renderAtelier() {
+  renderCategoryTabs();
+  renderObjectGrid(currentCategory);
+  renderShelf();
+  renderDroppedObjects();
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  tabs.innerHTML = '';
+  categories.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab' + (i === currentCategory ? ' active' : '');
+    btn.textContent = cat.icon + ' ' + (currentLang==='fr' ? cat.fr.name : cat.en.name);
+    btn.onclick = () => {
+      currentCategory = i;
+      document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      renderObjectGrid(i);
+      updateCategoryHeader(i);
+    };
+    tabs.appendChild(btn);
+  });
+  updateCategoryHeader(currentCategory);
+}
+
+function updateCategoryHeader(i) {
+  const cat = categories[i];
+  document.getElementById('cat-icon').textContent = cat.icon;
+  document.getElementById('cat-title').textContent = currentLang==='fr' ? cat.fr.name : cat.en.name;
+  document.getElementById('cat-desc').textContent = currentLang==='fr' ? cat.fr.desc : cat.en.desc;
+}
+
+function renderObjectGrid(catIndex) {
+  const grid = document.getElementById('object-grid');
+  grid.innerHTML = '';
+  categories[catIndex].objects.forEach((obj, i) => {
+    const item = document.createElement('div');
+    item.className = 'object-item';
+    item.innerHTML = `<div class="obj-visual">${obj.emoji}</div><div class="obj-name">${currentLang==='fr'?obj.fr:obj.en}</div>`;
+    item.dataset.emoji = obj.emoji;
+    item.dataset.name = currentLang==='fr'?obj.fr:obj.en;
+
+    // Touch / Mouse drag start
+    item.addEventListener('mousedown', (e) => startDragNew(e, obj.emoji, obj));
+    item.addEventListener('touchstart', (e) => startDragNew(e, obj.emoji, obj), {passive:false});
+    grid.appendChild(item);
+  });
+}
+
+// ============================================================
+// SHELF RENDERING
+// ============================================================
+function renderShelf() {
+  if (selectedMobilier === null) return;
+  const sh = shelves[selectedMobilier];
+  const container = document.getElementById('shelf-svg-container');
+  // Insert SVG
+  const existing = container.querySelector('svg');
+  if (existing) existing.remove();
+  container.insertAdjacentHTML('afterbegin', sh.svgPath);
+
+  // Make shelf a drop target
+  container.addEventListener('dragover', e => e.preventDefault());
+}
+
+function renderDroppedObjects() {
+  const layer = document.getElementById('dropped-objects-layer');
+  layer.innerHTML = '';
+  droppedObjects.forEach((obj, i) => {
+    const el = document.createElement('div');
+    el.className = 'dropped-obj';
+    el.id = 'dobj-' + i;
+    el.textContent = obj.emoji;
+    el.style.left = obj.x + 'px';
+    el.style.top = obj.y + 'px';
+    el.addEventListener('mousedown', (e) => startDragDropped(e, i));
+    el.addEventListener('touchstart', (e) => startDragDropped(e, i), {passive:false});
+    layer.appendChild(el);
+  });
+}
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+let dragEmoji = '';
+let dragObj = null;
+let dragStartX = 0, dragStartY = 0;
+let dragOffX = 0, dragOffY = 0;
+
+function getEventXY(e) {
+  if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+
+function startDragNew(e, emoji, objData) {
+  e.preventDefault();
+  isDraggingDropped = false;
+  dragEmoji = emoji;
+  dragObj = objData;
+  const {x, y} = getEventXY(e);
+  dragGhost.textContent = emoji;
+  dragGhost.style.display = 'block';
+  dragGhost.style.left = x + 'px';
+  dragGhost.style.top = y + 'px';
+  bindDragEvents();
+}
+
+function startDragDropped(e, index) {
+  e.preventDefault();
+  e.stopPropagation();
+  isDraggingDropped = true;
+  dragDroppedId = index;
+  const obj = droppedObjects[index];
+  dragEmoji = obj.emoji;
+  const {x, y} = getEventXY(e);
+  dragGhost.textContent = dragEmoji;
+  dragGhost.style.display = 'block';
+  dragGhost.style.left = x + 'px';
+  dragGhost.style.top = y + 'px';
+  // hide original
+  const el = document.getElementById('dobj-' + index);
+  if (el) el.style.opacity = '0.3';
+  bindDragEvents();
+}
+
+function bindDragEvents() {
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+  document.addEventListener('touchmove', onDragMove, {passive:false});
+  document.addEventListener('touchend', onDragEnd);
+}
+
+function onDragMove(e) {
+  e.preventDefault();
+  const {x, y} = getEventXY(e);
+  dragGhost.style.left = x + 'px';
+  dragGhost.style.top = y + 'px';
+}
+
+function onDragEnd(e) {
+  e.preventDefault();
+  const {x, y} = getEventXY(e);
+  dragGhost.style.display = 'none';
+
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', onDragEnd);
+  document.removeEventListener('touchmove', onDragMove);
+  document.removeEventListener('touchend', onDragEnd);
+
+  // Get shelf container bounds
+  const container = document.getElementById('shelf-svg-container');
+  const rect = container.getBoundingClientRect();
+
+  const relX = x - rect.left;
+  const relY = y - rect.top;
+
+  const isInsideShelf = relX >= 0 && relX <= rect.width && relY >= 0 && relY <= rect.height;
+
+  if (isDraggingDropped) {
+    const el = document.getElementById('dobj-' + dragDroppedId);
+    if (isInsideShelf) {
+      // Check if near boundary → vibrate
+      const nearBoundary = relX < 20 || relX > rect.width-20 || relY < 20 || relY > rect.height-20;
+      droppedObjects[dragDroppedId].x = relX;
+      droppedObjects[dragDroppedId].y = relY;
+      renderDroppedObjects();
+      if (nearBoundary) {
+        const newEl = document.getElementById('dobj-' + dragDroppedId);
+        if (newEl) {
+          newEl.classList.add('vibrate');
+          setTimeout(() => newEl.classList.remove('vibrate'), 500);
+        }
+      }
+    } else {
+      // Drop outside → disappear + remove
+      if (el) {
+        el.style.opacity = '1';
+        el.classList.add('disappear');
+        setTimeout(() => {
+          droppedObjects.splice(dragDroppedId, 1);
+          renderDroppedObjects();
+        }, 400);
+      } else {
+        droppedObjects.splice(dragDroppedId, 1);
+        renderDroppedObjects();
+      }
+    }
+  } else {
+    if (isInsideShelf) {
+      droppedObjects.push({ emoji: dragEmoji, x: relX, y: relY });
+      renderDroppedObjects();
+      const newEl = document.getElementById('dobj-' + (droppedObjects.length-1));
+      if (newEl) {
+        const nearBoundary = relX < 20 || relX > rect.width-20 || relY < 20 || relY > rect.height-20;
+        if (nearBoundary) {
+          newEl.classList.add('vibrate');
+          setTimeout(() => newEl.classList.remove('vibrate'), 500);
+        }
+      }
+    }
+    // if dropped outside, nothing happens (object stays in carousel)
+  }
+
+  isDraggingDropped = false;
+  dragDroppedId = null;
+}
+
+// ============================================================
+// FIN SCREEN
+// ============================================================
+function renderFin() {
+  // Clone shelf with objects into preview
+  const preview = document.getElementById('fin-shelf-preview');
+  if (selectedMobilier !== null) {
+    const sh = shelves[selectedMobilier];
+    preview.innerHTML = sh.svgPath;
+    preview.style.position = 'relative';
+    droppedObjects.forEach(obj => {
+      const el = document.createElement('div');
+      el.style.cssText = `position:absolute; left:${obj.x/420*100}%; top:${obj.y/380*100}%; font-size:20px; transform:translate(-50%,-50%);`;
+      el.textContent = obj.emoji;
+      preview.appendChild(el);
+    });
+  }
+
+  // Draw simple QR code pattern (decorative)
+  drawDecorativeQR();
+}
+
+function drawDecorativeQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 120;
+  const cell = 6;
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle = '#1a1a1a';
+  // decorative QR-like pattern
+  for(let i=0;i<size/cell;i++) {
+    for(let j=0;j<size/cell;j++) {
+      if(Math.random() > 0.5) ctx.fillRect(i*cell, j*cell, cell-1, cell-1);
+    }
+  }
+  // Corner squares
+  [[0,0],[14,0],[0,14]].forEach(([ox,oy]) => {
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(ox*cell,oy*cell,5*cell,5*cell);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(ox*cell+cell,oy*cell+cell,3*cell,3*cell);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(ox*cell+cell*1.5,oy*cell+cell*1.5,2*cell,2*cell);
+  });
+}
+
+// ============================================================
+// VEILLE SCREENSAVER
+// ============================================================
+let veilleRAF = null;
+let veilleObjects = [];
+
+function startVeille() {
+  const canvas = document.getElementById('veille-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Update text
+  const txt = document.getElementById('veille-text-fr');
+  if (currentLang === 'en') txt.innerHTML = 'SCREENSAVER<br>TOUCH THE SCREEN TO BEGIN';
+  else txt.innerHTML = 'ÉCRAN DE VEILLE<br>INVITATION À TOUCHER L\'ÉCRAN';
+
+  const emojis = ['📚','🌿','🪙','🎨','📷','💡','🎭','🔭','🏺','🦋','🌸','🎸'];
+  if (veilleObjects.length === 0) {
+    for(let i=0;i<12;i++) {
+      veilleObjects.push({
+        emoji: emojis[i % emojis.length],
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random()-0.5) * 0.6,
+        vy: (Math.random()-0.5) * 0.6,
+        size: 28 + Math.random()*24,
+        rot: Math.random()*Math.PI*2,
+        rotV: (Math.random()-0.5)*0.01
+      });
+    }
+  }
+
+  if (veilleRAF) cancelAnimationFrame(veilleRAF);
+
+  function draw() {
+    if (currentScreen !== 'veille') return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--cream') || '#F5F2DC';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    veilleObjects.forEach(obj => {
+      obj.x += obj.vx;
+      obj.y += obj.vy;
+      obj.rot += obj.rotV;
+      if(obj.x < -40) obj.x = canvas.width+40;
+      if(obj.x > canvas.width+40) obj.x = -40;
+      if(obj.y < -40) obj.y = canvas.height+40;
+      if(obj.y > canvas.height+40) obj.y = -40;
+      ctx.save();
+      ctx.translate(obj.x, obj.y);
+      ctx.rotate(obj.rot);
+      ctx.font = `${obj.size}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.globalAlpha = 0.5;
+      ctx.fillText(obj.emoji, 0, 0);
+      ctx.restore();
+    });
+
+    veilleRAF = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============================================================
+// TIMEOUT SYSTEM
+// ============================================================
+function resetTimeout() {
+  clearTimeout(timeoutTimer);
+  clearTimeout(timeoutWarningTimer);
+  if (currentScreen === 'veille') return;
+
+  timeoutWarningTimer = setTimeout(() => {
+    document.getElementById('timeout-overlay').classList.add('active');
+    timeoutTimer = setTimeout(() => {
+      document.getElementById('timeout-overlay').classList.remove('active');
+      goToScreen('veille');
+      resetApp();
+    }, TIMEOUT_RESET);
+  }, TIMEOUT_WARN);
+}
+
+function dismissTimeout() {
+  clearTimeout(timeoutTimer);
+  document.getElementById('timeout-overlay').classList.remove('active');
+  resetTimeout();
+}
+
+// Any user interaction resets timeout
+document.addEventListener('click', resetTimeout);
+document.addEventListener('touchstart', resetTimeout);
+
+// ============================================================
+// HOME CONFIRM
+// ============================================================
+function showHomeConfirm() {
+  document.getElementById('home-confirm').classList.add('active');
+}
+function hideHomeConfirm() {
+  document.getElementById('home-confirm').classList.remove('active');
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetApp() {
+  selectedStyle = null;
+  selectedMobilier = null;
+  currentCategory = 0;
+  droppedObjects = [];
+  document.body.className = '';
+  veilleObjects = [];
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateTexts();
+startVeille();
+resetTimeout();
+
+window.addEventListener('resize', () => {
+  if (currentScreen === 'veille') {
+    const canvas = document.getElementById('veille-canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+});
+</script>
+</body>
+</html>
