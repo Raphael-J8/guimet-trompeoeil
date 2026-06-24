@@ -68,6 +68,21 @@ function onDragMove(e) {
   dragGhost.style.top = y + 'px';
 }
 
+function vibrateAndRemove(index) {
+  const el = document.getElementById('dobj-' + index);
+  if (el) {
+    el.style.opacity = '1';
+    el.classList.add('vibrate');
+    setTimeout(() => {
+      state.droppedObjects.splice(index, 1);
+      renderDroppedObjects();
+    }, 420);
+  } else {
+    state.droppedObjects.splice(index, 1);
+    renderDroppedObjects();
+  }
+}
+
 function onDragEnd(e) {
   e.preventDefault();
   const { x, y } = getEventXY(e);
@@ -83,22 +98,18 @@ function onDragEnd(e) {
   const relX = x - rect.left;
   const relY = y - rect.top;
   const isInsideShelf = relX >= 0 && relX <= rect.width && relY >= 0 && relY <= rect.height;
-  const nearBoundary = relX < 20 || relX > rect.width - 20 || relY < 20 || relY > rect.height - 20;
+  // Objet posé contre une paroi → vibration + retour au carousel
+  const onWall = relX < 18 || relX > rect.width - 18 || relY < 18 || relY > rect.height - 18;
 
   if (isDraggingDropped) {
-    const el = document.getElementById('dobj-' + dragDroppedId);
     if (isInsideShelf) {
       state.droppedObjects[dragDroppedId].x = relX;
       state.droppedObjects[dragDroppedId].y = relY;
       renderDroppedObjects();
-      if (nearBoundary) {
-        const newEl = document.getElementById('dobj-' + dragDroppedId);
-        if (newEl) {
-          newEl.classList.add('vibrate');
-          setTimeout(() => newEl.classList.remove('vibrate'), 500);
-        }
-      }
+      if (onWall) vibrateAndRemove(dragDroppedId);
     } else {
+      // Déposé hors de la bibliothèque → animation disparition
+      const el = document.getElementById('dobj-' + dragDroppedId);
       if (el) {
         el.style.opacity = '1';
         el.classList.add('disappear');
@@ -115,12 +126,12 @@ function onDragEnd(e) {
     if (isInsideShelf) {
       state.droppedObjects.push({ emoji: dragEmoji, x: relX, y: relY });
       renderDroppedObjects();
-      const newEl = document.getElementById('dobj-' + (state.droppedObjects.length - 1));
-      if (newEl && nearBoundary) {
-        newEl.classList.add('vibrate');
-        setTimeout(() => newEl.classList.remove('vibrate'), 500);
+      if (onWall) {
+        // Posé contre une paroi → vibration + retour
+        vibrateAndRemove(state.droppedObjects.length - 1);
       }
     }
+    // Si déposé en dehors, l'objet reste simplement dans le carousel
   }
 
   isDraggingDropped = false;

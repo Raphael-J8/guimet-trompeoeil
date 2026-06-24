@@ -16,7 +16,8 @@ export function renderCategoryTabs() {
   categories.forEach((cat, i) => {
     const btn = document.createElement('button');
     btn.className = 'cat-tab' + (i === state.currentCategory ? ' active' : '');
-    btn.textContent = cat.icon + ' ' + (state.currentLang === 'fr' ? cat.fr.name : cat.en.name);
+    btn.textContent = cat.icon;
+    btn.title = state.currentLang === 'fr' ? cat.fr.name : cat.en.name;
     btn.addEventListener('click', () => {
       state.currentCategory = i;
       document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
@@ -40,9 +41,13 @@ export function renderObjectGrid(catIndex) {
   const grid = document.getElementById('object-grid');
   grid.innerHTML = '';
   categories[catIndex].objects.forEach(obj => {
+    const name = state.currentLang === 'fr' ? obj.fr : obj.en;
     const item = document.createElement('div');
     item.className = 'object-item';
-    item.innerHTML = `<div class="obj-visual">${obj.emoji}</div><div class="obj-name">${state.currentLang === 'fr' ? obj.fr : obj.en}</div>`;
+    item.innerHTML = `
+      <div class="obj-blob"><span class="obj-emoji">${obj.emoji}</span></div>
+      <div class="obj-name">${name}</div>
+    `;
     item.addEventListener('mousedown', e => startDragNew(e, obj.emoji, obj));
     item.addEventListener('touchstart', e => startDragNew(e, obj.emoji, obj), { passive: false });
     grid.appendChild(item);

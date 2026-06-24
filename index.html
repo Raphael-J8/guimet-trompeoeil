@@ -4,12 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ma Bibliothèque · Guimet</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body>
 
-<!-- SCREEN 0: VEILLE -->
+<!-- ÉCRAN 0 : VEILLE -->
 <div id="screen-veille" class="screen active">
   <canvas id="veille-canvas"></canvas>
   <div class="veille-text" id="veille-text">
@@ -17,58 +16,90 @@
   </div>
 </div>
 
-<!-- SCREEN 1: ACCUEIL -->
+<!-- ÉCRAN 1 : TITRE / LANGUE -->
 <div id="screen-accueil" class="screen">
   <div class="app-title" id="title-text">MA BIBLIOTHÈQUE</div>
   <div class="app-subtitle" id="subtitle-text">COMPOSEZ VOTRE ÉTAGÈRE PERSONNELLE</div>
-  <div class="citation" id="citation1-text">
-    « Une bibliothèque, c'est une façon de parler de soi sans avoir à dire un mot. »
-  </div>
   <div class="lang-buttons">
-    <button class="lang-btn" id="btn-fr">COMMENCER</button>
-    <button class="lang-btn" id="btn-en">START</button>
+    <button class="lang-btn" id="btn-fr">FRANÇAIS</button>
+    <button class="lang-btn" id="btn-en">ENGLISH</button>
   </div>
 </div>
 
-<!-- SCREEN 2: STYLE -->
-<div id="screen-style" class="screen">
+<!-- ÉCRAN 2 : INSTRUCTIONS -->
+<div id="screen-instructions" class="screen">
+  <div class="instructions-content">
+    <p class="instructions-intro" id="instructions-intro">
+      Explorez l'art de la bibliothèque en trompe-l'œil. Composez votre étagère personnelle en sélectionnant des objets qui vous ressemblent et en les disposant librement dans votre bibliothèque.
+    </p>
+    <blockquote class="instructions-citation" id="citation1-text">
+      « Une bibliothèque, c'est une façon de parler de soi sans avoir à dire un mot. »
+    </blockquote>
+    <button class="instructions-btn" id="instructions-next" id="instructions-next">COMMENCER →</button>
+  </div>
+  <div class="nav-bar">
+    <button class="nav-btn" id="instructions-back">
+      <span class="nav-icon">◁</span>
+      <span id="lbl-retour-2">Retour</span>
+    </button>
+  </div>
+</div>
+
+<!-- ÉCRAN 3 : STYLE -->
+<div id="screen-style" class="screen" style="padding: 48px 80px 100px;">
   <div class="screen-title" id="style-screen-title">CHOISISSEZ VOTRE STYLE ET ENVIRONNEMENT</div>
   <div class="style-grid">
     <div class="style-card" id="style-baroque" style="background:#F4EDD0;">
       <div class="style-card-img">🏛️</div>
-      <div class="style-card-label">STYLE BAROQUE</div>
-      <div class="style-card-desc">Ornements dorés, richesse classique</div>
+      <div class="style-card-bottom">
+        <div class="style-card-label">STYLE BAROQUE</div>
+        <div class="style-card-desc">Ornements dorés, richesse classique</div>
+      </div>
     </div>
     <div class="style-card" id="style-aquarelle" style="background:#C8E8D8;">
       <div class="style-card-img">🎨</div>
-      <div class="style-card-label">STYLE AQUARELLE</div>
-      <div class="style-card-desc">Teintes douces, légèreté poétique</div>
+      <div class="style-card-bottom">
+        <div class="style-card-label">STYLE AQUARELLE</div>
+        <div class="style-card-desc">Teintes douces, légèreté poétique</div>
+      </div>
     </div>
     <div class="style-card" id="style-pop" style="background:#FFD080;">
       <div class="style-card-img">⚡</div>
-      <div class="style-card-label">STYLE POP</div>
-      <div class="style-card-desc">Couleurs vives, énergie contemporaine</div>
+      <div class="style-card-bottom">
+        <div class="style-card-label">STYLE POP</div>
+        <div class="style-card-desc">Couleurs vives, énergie contemporaine</div>
+      </div>
     </div>
   </div>
   <div class="nav-bar">
-    <button class="nav-btn" id="style-back">◁</button>
-    <div class="nav-center" id="style-hint">CHOISISSEZ VOTRE STYLE ET ENVIRONNEMENT</div>
-    <button class="nav-btn" id="style-home">⌂</button>
+    <button class="nav-btn" id="style-back">
+      <span class="nav-icon">◁</span>
+      <span id="lbl-retour-3">Retour</span>
+    </button>
+    <button class="nav-btn nav-btn-home" id="style-home">
+      <span id="lbl-accueil-3">Accueil</span>
+      <span class="nav-icon">⌂</span>
+    </button>
   </div>
 </div>
 
-<!-- SCREEN 3: MOBILIER -->
-<div id="screen-mobilier" class="screen">
-  <div class="screen-title" id="mobilier-screen-title">CHOISISSEZ VOTRE MOBILIER</div>
+<!-- ÉCRAN 4 : MOBILIER -->
+<div id="screen-mobilier" class="screen" style="padding: 48px 80px 100px;">
+  <div class="screen-title" id="mobilier-screen-title">CHOISISSEZ VOTRE BIBLIOTHÈQUE</div>
   <div class="mobilier-grid" id="mobilier-grid"></div>
   <div class="nav-bar">
-    <button class="nav-btn" id="mobilier-back">◁</button>
-    <div class="nav-center" id="mobilier-hint">CHOISISSEZ VOTRE MOBILIER.</div>
-    <button class="nav-btn" id="mobilier-home">⌂</button>
+    <button class="nav-btn" id="mobilier-back">
+      <span class="nav-icon">◁</span>
+      <span id="lbl-retour-4">Retour</span>
+    </button>
+    <button class="nav-btn nav-btn-home" id="mobilier-home">
+      <span id="lbl-accueil-4">Accueil</span>
+      <span class="nav-icon">⌂</span>
+    </button>
   </div>
 </div>
 
-<!-- SCREEN 4: ATELIER -->
+<!-- ÉCRAN 5 : ATELIER -->
 <div id="screen-atelier" class="screen">
   <div class="atelier-left">
     <div class="category-header">
@@ -78,28 +109,42 @@
         <p id="cat-desc">Des objets qui éveillent votre curiosité et vous inspirent au quotidien.</p>
       </div>
     </div>
-    <div class="category-tabs" id="category-tabs"></div>
     <div class="object-carousel">
       <div class="object-grid" id="object-grid"></div>
     </div>
+    <div class="category-tabs" id="category-tabs"></div>
   </div>
+
   <div class="atelier-right">
+    <p class="atelier-instruction" id="atelier-hint">
+      Glissez-déposez l'objet de votre choix sur votre bibliothèque
+    </p>
     <div class="shelf-stage">
       <div id="shelf-svg-container">
         <div id="dropped-objects-layer"></div>
       </div>
     </div>
-    <div class="shelf-hint" id="shelf-hint">GLISSEZ LES OBJETS SUR LE MOBILIER</div>
   </div>
-  <div class="nav-bar" style="left:48px; right:48px; bottom:16px;">
-    <button class="nav-btn" id="atelier-back">◁</button>
-    <div class="nav-center" id="atelier-hint">INVITATION À REMPLIR LE MOBILIER</div>
-    <button class="nav-btn validate" id="atelier-validate">✓</button>
-    <button class="nav-btn" id="atelier-home" style="margin-left:8px;">⌂</button>
+
+  <div class="nav-bar" style="left:36px; right:36px; bottom:16px;">
+    <button class="nav-btn" id="atelier-back">
+      <span class="nav-icon">◁</span>
+      <span id="lbl-retour-5">Retour</span>
+    </button>
+    <div class="nav-group">
+      <button class="nav-btn nav-btn-validate" id="atelier-validate" id="atelier-validate">
+        <span id="lbl-valider">Valider</span>
+        <span class="nav-icon">✓</span>
+      </button>
+      <button class="nav-btn nav-btn-home" id="atelier-home">
+        <span id="lbl-accueil-5">Accueil</span>
+        <span class="nav-icon">⌂</span>
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- SCREEN 5: FIN -->
+<!-- ÉCRAN 6 : FIN -->
 <div id="screen-fin" class="screen">
   <div class="fin-title" id="fin-title">VOTRE BIBLIOTHÈQUE EST CRÉÉE !</div>
   <div style="display:flex; gap:48px; align-items:center;">
@@ -107,9 +152,9 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
       <div class="qr-placeholder">
         <canvas id="qr-canvas" width="120" height="120"></canvas>
-        <span style="font-size:12px; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em;">QR Code</span>
+        <span style="font-size:11px; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em;">QR Code</span>
       </div>
-      <div style="font-size:16px; text-align:center; opacity:0.6; text-transform:uppercase; letter-spacing:0.06em;">Scannez pour partager</div>
+      <div style="font-size:14px; text-align:center; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em;" id="lbl-scanner">Scannez pour partager</div>
     </div>
   </div>
   <div class="fin-citation" id="fin-citation">
@@ -117,9 +162,14 @@
   </div>
   <div class="fin-credits">Une expérience interactive · Musée Guimet · 2024</div>
   <div class="nav-bar">
-    <button class="nav-btn" id="fin-back">◁</button>
-    <div class="nav-center"></div>
-    <button class="nav-btn" id="fin-home">⌂</button>
+    <button class="nav-btn" id="fin-back">
+      <span class="nav-icon">◁</span>
+      <span id="lbl-retour-6">Retour</span>
+    </button>
+    <button class="nav-btn nav-btn-home" id="fin-home">
+      <span id="lbl-accueil-6">Accueil</span>
+      <span class="nav-icon">⌂</span>
+    </button>
   </div>
 </div>
 
