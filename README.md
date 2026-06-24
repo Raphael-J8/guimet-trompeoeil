@@ -1,6 +1,5 @@
 # App Creation From Document
 
-Created with [Omma](https://omma.build)
 
 ## Setup
 
